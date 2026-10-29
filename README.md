@@ -1,40 +1,73 @@
 # Campus Lost & Found
 
-A Flask and SQLite web application for a DBMS project. Students can only browse available items. Coordinators handle day-to-day item entry, updates, desk claims, and handovers; Super Admins oversee the complete record and manage Coordinator accounts.
+A Flask and SQLite web application for a DBMS project. Students can browse available items, while Coordinators handle item entry, updates, claims, and handovers. Super Admins oversee all records and manage Coordinator accounts.
 
-## Run locally
+## Run Locally
 
-```powershell
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-python app.py
-```
+1. Create a virtual environment:
 
-Open `http://127.0.0.1:5000` for the student view.
+   ```powershell
+   py -m venv .venv
+   ```
 
-- Coordinator portal: `http://127.0.0.1:5000/coordinator/login`
-- Super Admin portal: `http://127.0.0.1:5000/admin/login`
+2. Activate the virtual environment:
 
-Default demo credentials:
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
 
-| Role | Account ID | Password |
-| --- | --- |
-| Super Admin | `admin` | `admin123` |
+3. Install dependencies:
+
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+4. Start the application:
+
+   ```powershell
+   python app.py
+   ```
+
+Open the student portal at http://127.0.0.1:5000.
+
+### Portals
+
+* **Student Portal:** `/`
+* **Coordinator Portal:** `/coordinator/login`
+* **Super Admin Portal:** `/admin/login`
+
+### Default Demo Credentials
+
+| Role        | Account ID    | Password         |
+| ----------- | ------------- | ---------------- |
+| Super Admin | `admin`       | `admin123`       |
 | Coordinator | `coordinator` | `coordinator123` |
 
-Change these credentials and the `SECRET_KEY` before hosting publicly.
+**Security note:** Change the default credentials and `SECRET_KEY` before deploying the application publicly.
 
-## Database design
+## Database Design
 
-- `admins`: both Super Admin and Coordinator identities, role, active state, and securely hashed passwords.
-- `items`: item name, description, building (`TT`, `SJT`, or `PRP`), submission timestamp, image, status, and creator.
-- `collections`: one collection record per returned item, including the student's register number, collection time, and processing admin.
-- `claimed_objects`: one claim record per item, entered by a Coordinator after a student visits the desk, including the student's name, register number, email, and claim time.
+* **`admins`:** Stores Super Admin and Coordinator accounts, roles, active status, and securely hashed passwords.
+* **`items`:** Stores item names, descriptions, buildings (`TT`, `SJT`, or `PRP`), submission timestamps, images, statuses, and creators.
+* **`collections`:** Records returned items, including the student's register number, collection time, and processing administrator.
+* **`claimed_objects`:** Stores claims recorded by Coordinators at the desk, including the student's name, register number, email, and claim time.
 
-## Access control
+## Access Control
 
-- **Super Admin:** access the full item/claim/collection audit record; edit or permanently delete any item and its linked records; and create, update, activate, deactivate, or delete unused Coordinator accounts.
-- **Coordinator:** add and edit items, record a claim on behalf of a student at the desk, review student claims, and record physical handovers. This role cannot access account management or the full audit portal.
+### Super Admin
 
-The SQLite database (`lost_and_found.db`) and uploaded images are created automatically on first run.
+* View the complete item, claim, and collection audit records.
+* Edit or permanently delete items and their linked records.
+* Create, update, activate, deactivate, and delete unused Coordinator accounts.
+
+### Coordinator
+
+* Add and edit items.
+* Record claims on behalf of students visiting the desk.
+* Review student claims.
+* Record physical handovers.
+* Cannot access account management or the full audit portal.
+
+## Storage
+
+The SQLite database (`lost_and_found.db`) and uploaded images are created automatically on the first run.
