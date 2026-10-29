@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ portal_name }} sign in | CampusFind{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-intro">
+    <p class="eyebrow">{{ portal_name|upper }} PORTAL</p>
+    {% if portal_name == 'Super Admin' %}
+      <h1>System oversight,<br><em>all in one place.</em></h1>
+      <p>Access the complete item, claim, collection, and coordinator-account record.</p>
+    {% else %}
+      <h1>Help good things<br><em>find their way home.</em></h1>
+      <p>Add and update found items, record desk claims, and safely complete handovers without database access.</p>
+    {% endif %}
+  </div>
+  <form class="auth-card" method="post">
+    <h2>Welcome back</h2><p>Sign in to the {{ portal_name }} portal.</p>
+    <label>{{ portal_name }} ID<input name="admin_id" autocomplete="username" required autofocus placeholder="Your account ID"></label>
+    <label>Password<input name="password" type="password" autocomplete="current-password" required placeholder="Your password"></label>
+    <button class="button button-full" type="submit">Sign in</button>
+    <small>Demo: <strong>{{ demo_id }}</strong> / <strong>{{ demo_password }}</strong></small>
+  </form>
+</section>
+{% endblock %}

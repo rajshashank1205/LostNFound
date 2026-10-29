@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Find your item · CampusFind{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">CAMPUS LOST & FOUND</p>
+  <h1>Something missing?<br><em>It may be right here.</em></h1>
+  <p class="hero-copy">Browse items handed in at TT, SJT, and PRP. If you recognise one, visit the Lost & Found desk with proof of ownership.</p>
+</section>
+<section class="content-wrap">
+  <form class="filters" method="get">
+    <label class="search"><span>⌕</span><input name="search" value="{{ search }}" placeholder="Search items, colours, descriptions…"></label>
+    <select name="building" aria-label="Filter by building">
+      <option value="">All buildings</option>
+      {% for building in buildings %}<option value="{{ building }}" {% if selected_building == building %}selected{% endif %}>{{ building }}</option>{% endfor %}
+    </select>
+    <button class="button" type="submit">Search</button>
+  </form>
+  <div class="section-heading"><div><p class="eyebrow">AVAILABLE NOW</p><h2>{{ items|length }} item{% if items|length != 1 %}s{% endif %} waiting to be reunited</h2></div></div>
+  {% if items %}
+    <div class="item-grid">
+      {% for item in items %}
+      <article class="item-card">
+        <img src="{{ url_for('static', filename='uploads/' + item.image_filename) }}" alt="Photo of {{ item.item_name }}">
+        <div class="item-details">
+          <div class="card-topline"><span class="building">{{ item.building }}</span><span class="available">Available</span></div>
+          <h3>{{ item.item_name }}</h3>
+          <p>{{ item.description or 'No additional description provided.' }}</p>
+          <div class="submitted">Handed in · {{ item.submitted_at|display_datetime }}</div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state"><div>⌕</div><h2>No items found</h2><p>Try another building or a different search term.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

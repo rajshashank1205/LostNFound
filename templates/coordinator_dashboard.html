@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Coordinator portal | CampusFind{% endblock %}
+{% block content %}
+<section class="dashboard-head content-wrap">
+  <div><p class="eyebrow">COORDINATOR PORTAL | {{ session.user_name }}</p><h1>Lost &amp; found register</h1><p>Add, correct, and securely hand over items. Student claims are recorded here automatically.</p></div>
+  <div class="stats"><div><strong>{{ counts.total or 0 }}</strong><span>Total</span></div><div><strong>{{ counts.available or 0 }}</strong><span>Available</span></div><div><strong>{{ counts.claimed or 0 }}</strong><span>Claimed</span></div><div><strong>{{ counts.collected or 0 }}</strong><span>Collected</span></div></div>
+</section>
+<section class="dashboard-layout content-wrap">
+  <aside class="add-panel">
+    <p class="eyebrow">NEW ENTRY</p><h2>Add a found item</h2>
+    <form method="post" action="{{ url_for('add_item') }}" enctype="multipart/form-data">
+      <label>Item name <span class="required">*</span><input name="item_name" required placeholder="e.g. Black water bottle"></label>
+      <label>Description<textarea name="description" rows="3" placeholder="Brand, colour, identifying details..."></textarea></label>
+      <label>Building <span class="required">*</span><select name="building" required><option value="" disabled selected>Select location</option>{% for building in buildings %}<option value="{{ building }}">{{ building }}</option>{% endfor %}</select></label>
+      <label>Date &amp; time submitted <span class="required">*</span><input type="datetime-local" name="submitted_at" required></label>
+      <label>Item image <span class="required">*</span><input class="file-input" type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp" required></label>
+      <button class="button button-full" type="submit">Add to public board</button>
+    </form>
+  </aside>
+  <section class="register-panel">
+    <div class="section-heading"><div><p class="eyebrow">WORKING REGISTER</p><h2>Items and claims</h2></div></div>
+    {% if items %}
+      <div class="admin-items">
+      {% for item in items %}
+        <article class="admin-item {% if item.status == 'Collected' %}is-collected{% endif %}">
+          <img src="{{ url_for('static', filename='uploads/' + item.image_filename) }}" alt="Photo of {{ item.item_name }}">
+          <div class="admin-item-info">
+            <div class="card-topline"><span class="building">{{ item.building }}</span>{% if item.claimant_name and item.status == 'Available' %}<span class="status claimed">Claimed</span>{% else %}<span class="status {{ item.status|lower }}">{{ item.status }}</span>{% endif %}</div>
+            <h3>{{ item.item_name }}</h3><p>{{ item.description or 'No description.' }}</p><small>Handed in {{ item.submitted_at|display_datetime }}</small>
+            <a class="edit-link" href="{{ url_for('edit_item', item_id=item.id) }}">Edit item details</a>
+          </div>
+          <div class="collection-area">
+            {% if item.claimant_name %}
+              <div class="claimant-info"><strong>Claim submitted</strong><span>{{ item.claimant_name }} | {{ item.claimant_register_number }}</span><a href="mailto:{{ item.claimant_email }}">{{ item.claimant_email }}</a><small>{{ item.claimed_at|display_datetime }}</small></div>
+            {% elif item.status == 'Available' %}
+              <details class="manual-claim"><summary>Record a desk claim</summary>
+                <form method="post" action="{{ url_for('record_claim', item_id=item.id) }}">
+                  <input name="student_name" required placeholder="Student name"><input name="register_number" required placeholder="Register number"><input name="email" type="email" required placeholder="Email address">
+                  <button class="collect-button" type="submit">Save claim</button>
+                </form>
+              </details>
+            {% endif %}
+            {% if item.status == 'Available' %}
+              <form method="post" action="{{ url_for('collect_item', item_id=item.id) }}">
+                <label>Register number for handover<input name="register_number" required value="{{ item.claimant_register_number or '' }}" placeholder="e.g. 22BCE0001"></label>
+                <button class="collect-button" type="submit">Mark collected</button>
+              </form>
+            {% else %}
+              <div class="collected-info"><strong>Collected by {{ item.collection_register_number }}</strong><span>{{ item.collected_at|display_datetime }}</span></div>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+      </div>
+    {% else %}<div class="empty-state"><div>+</div><h2>No entries yet</h2><p>Add the first found item using the form.</p></div>{% endif %}
+  </section>
+</section>
+{% endblock %}

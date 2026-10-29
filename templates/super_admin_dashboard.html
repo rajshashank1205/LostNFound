@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Super Admin portal | CampusFind{% endblock %}
+{% block content %}
+<section class="system-head content-wrap">
+  <div><p class="eyebrow">SUPER ADMIN PORTAL | {{ session.user_name }}</p><h1>System control centre</h1><p>Full control of item records, claims, handovers, and Coordinator accounts.</p></div>
+  <div class="stats"><div><strong>{{ counts.total or 0 }}</strong><span>Items</span></div><div><strong>{{ counts.available or 0 }}</strong><span>Public</span></div><div><strong>{{ counts.claimed or 0 }}</strong><span>Claims</span></div><div><strong>{{ counts.collected or 0 }}</strong><span>Handovers</span></div></div>
+</section>
+<section class="super-grid content-wrap">
+  <aside class="coordinator-manager">
+    <p class="eyebrow">ACCOUNT MANAGEMENT</p><h2>Create coordinator</h2>
+    <form method="post" action="{{ url_for('create_coordinator') }}">
+      <label>Coordinator ID<input name="admin_id" required pattern="[A-Za-z0-9_.-]{3,30}" placeholder="e.g. desk.sjt"></label>
+      <label>Temporary password<input type="password" name="password" required minlength="8" placeholder="Minimum 8 characters"></label>
+      <button class="button button-full" type="submit">Create coordinator</button>
+    </form>
+    <div class="coordinator-list"><h3>Coordinator accounts</h3>
+      {% for coordinator in coordinators %}
+        <div class="coordinator-row"><div><strong>{{ coordinator.admin_id }}</strong><span>{{ 'Active' if coordinator.is_active else 'Inactive' }}</span></div><div class="account-actions"><form method="post" action="{{ url_for('toggle_coordinator', coordinator_id=coordinator.id) }}"><button class="mini-button" type="submit">{{ 'Deactivate' if coordinator.is_active else 'Activate' }}</button></form><details class="account-edit"><summary>Edit</summary><form method="post" action="{{ url_for('update_coordinator', coordinator_id=coordinator.id) }}"><input name="admin_id" value="{{ coordinator.admin_id }}" required><input name="password" type="password" minlength="8" placeholder="New password (optional)"><button class="mini-button" type="submit">Save account</button></form></details><form method="post" action="{{ url_for('delete_coordinator', coordinator_id=coordinator.id) }}" onsubmit="return confirm('Delete this Coordinator account?');"><button class="danger-button" type="submit">Delete</button></form></div></div>
+      {% else %}<p class="muted-copy">No coordinator accounts yet.</p>{% endfor %}
+    </div>
+  </aside>
+  <section class="audit-panel">
+    <div class="section-heading"><div><p class="eyebrow">FULL AUDIT RECORD</p><h2>Items, claims, and handovers</h2></div></div>
+    {% if items %}
+      <div class="audit-table-wrap"><table class="audit-table"><thead><tr><th>Item</th><th>Added by</th><th>Claim record</th><th>Collection record</th><th>Controls</th></tr></thead><tbody>
+      {% for item in items %}<tr>
+        <td><strong>{{ item.item_name }}</strong><span>{{ item.building }} | {{ item.status }} | {{ item.submitted_at|display_datetime }}</span></td>
+        <td>{{ item.added_by or '-' }}</td>
+        <td>{% if item.claimant_name %}<strong>{{ item.claimant_name }}</strong><span>{{ item.claimant_register_number }}<br>{{ item.claimant_email }}<br>{{ item.claimed_at|display_datetime }}</span>{% else %}-{% endif %}</td>
+        <td>{% if item.collection_register_number %}<strong>{{ item.collection_register_number }}</strong><span>Processed by {{ item.collected_by }}<br>{{ item.collected_at|display_datetime }}</span>{% else %}-{% endif %}</td>
+        <td><div class="item-controls"><a class="mini-button" href="{{ url_for('super_admin_edit_item', item_id=item.id) }}">Edit item</a><form method="post" action="{{ url_for('delete_item', item_id=item.id) }}" onsubmit="return confirm('Permanently delete this item and all linked claim/collection records?');"><button class="danger-button" type="submit">Delete item</button></form></div></td>
+      </tr>{% endfor %}
+      </tbody></table></div>
+    {% else %}<div class="empty-state"><div>+</div><h2>No item records yet</h2><p>Coordinator activity will appear here.</p></div>{% endif %}
+  </section>
+</section>
+{% endblock %}

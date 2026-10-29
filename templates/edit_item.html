@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Edit item | CampusFind{% endblock %}
+{% block content %}
+<section class="edit-layout">
+  <a class="back-link" href="{{ url_for(dashboard_endpoint) }}">&larr; Back to portal</a>
+  <form class="edit-card" method="post" enctype="multipart/form-data">
+    <div><p class="eyebrow">ITEM UPDATE</p><h1>Edit {{ item.item_name }}</h1><p>Correct item information. Existing claim and handover records remain untouched.</p></div>
+    <div class="edit-grid">
+      <label>Item name <span class="required">*</span><input name="item_name" value="{{ item.item_name }}" required></label>
+      <label>Building <span class="required">*</span><select name="building" required>{% for building in buildings %}<option value="{{ building }}" {% if item.building == building %}selected{% endif %}>{{ building }}</option>{% endfor %}</select></label>
+      <label class="span-two">Description<textarea name="description" rows="4" placeholder="Brand, colour, identifying details...">{{ item.description or '' }}</textarea></label>
+      <label>Date &amp; time submitted <span class="required">*</span><input type="datetime-local" name="submitted_at" value="{{ item.submitted_at }}" required></label>
+      <label>Replace image (optional)<input class="file-input" type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+    </div>
+    <button class="button" type="submit">Save changes</button>
+  </form>
+</section>
+{% endblock %}
